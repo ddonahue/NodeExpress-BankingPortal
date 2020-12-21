@@ -10,11 +10,7 @@ app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, '/public')));
 app.use(express.urlencoded({ extended: true }));
 
-const accountData = fs.readFileSync('./src/json/accounts.json', { encoding: 'utf8' });
-const accounts = JSON.parse(accountData);
-
-const userData = fs.readFileSync('./src/json/users.json', { encoding: 'utf8' });
-const users = JSON.parse(userData);
+const { accounts, users, writeJSON } = require('./data');
 
 app.get('/', function(req, res) {
   res.render('index', { title: 'Account Summary', accounts: accounts });
@@ -44,9 +40,7 @@ app.post('/transfer', function(req, res) {
   accounts[req.body.from].balance -= parseInt(req.body.amount);
   accounts[req.body.to].balance += parseInt(req.body.amount);
 
-  let accountsJSON = JSON.stringify(accounts, null, 4);
-  fs.writeFileSync(path.join(__dirname, 'json/accounts.json'), accountsJSON, 'utf8');
-  
+  writeJSON();
   res.render('transfer', { message: "Transfer Completed" });
 });
 
@@ -59,9 +53,7 @@ app.post('/payment', function(req, res) {
   accounts.credit.balance -= parseInt(req.body.amount);
   accounts.credit.available += parseInt(req.body.amount);
 
-  let accountsJSON = JSON.stringify(accounts, null, 4);
-  fs.writeFileSync(path.join(__dirname, 'json', 'accounts.json'), accountsJSON, 'utf8');
-  
+  writeJSON();
   res.render('payment', { message: "Payment Successful", account: accounts.credit });
 
 });
